@@ -5,9 +5,11 @@ int main(void){
 	double result;
 	
 	data = OperateFactory::OperateFun('+');
-	data->SetValueA(1);
-	data->SetValueB(2);
+	data->ValueA = 1;
+	data->ValueB = 2;
 	result = data->GetResult();
 	cout<<"Result = "<<result<<endl;
 	return 0;	
 }
+
+

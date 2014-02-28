@@ -6,37 +6,36 @@
 using namespace std;
 
 class Data{
-	private:
-		double ValueA, ValueB;
 	public:
-		void SetValueA(double value_a){ValueA = value_a;}
-		double GetValueA(void){return ValueA;}
-		void SetValueB(double value_b){ValueB = value_b;}
-		double GetValueB(void){return ValueB;}
+		double ValueA;
+		double ValueB;
 		virtual double GetResult(void){
 			double result = 0;
 			return result;
 		}
+		virtual ~Data(){cout<<"delete Data."<<endl;}
 };
 
 class DataAdd: public Data{
 	public:
 		double GetResult(void){
 			double result = 0;
-			result = GetValueA() + GetValueB();
+			result = ValueA + ValueB;
 			return result;
 		}	
+		~DataAdd(){cout<<"delete DataAdd."<<endl;}
 };
 
 class DataDiv: public Data{
 	public:
 		double GetResult(void){
 			double result = 0;
-			if(GetValueB() != 0){
-				result = GetValueA() / GetValueB();
+			if(ValueB != 0){
+				result = ValueA / ValueB;
 			}
 			return result;
 		}
+		~DataDiv(){cout<<"delete DataDiv."<<endl;}
 };
 
 class OperateFactory{
@@ -55,7 +54,11 @@ class OperateFactory{
 				break;
 			}
 			return pDataObj;
-		}
+		 }
+		 ~OperateFactory(){
+		 	cout<<"delete OperateFactory."<<endl;
+		 }
+
 };
 
 #endif
