@@ -1,4 +1,4 @@
-#ifdef _DECORATOR_PATTERN_H
+#ifndef _DECORATOR_PATTERN_H
 #define _DECORATOR_PATTERN_H
 
 #include<iostream>
@@ -7,43 +7,45 @@ using namespace std;
 
 class Person{
 	private:
-		char* name;
+		char name[10];
 	public:
 		Person(){}
-		Person(char* name){
+		Person(const char* name){
 			strcpy(this->name,name);
 		}
-		virtual void Show(void){
+		void Show(void){
 			cout<<" of "<<name<<endl;
 		}
 };
 
 class Finery : public Person{
 	protected:
-		Person person;
+		Person* person;
 	public:
-		void Decorate(Person person){
+		void Decorate(Person* person){
 			this->person = person;
 		}
 		void Show(void){
 			if(person != NULL){
-				person.Show();
+				person->Show();
 			}
 		}
 };
 
 class TShirts : public Finery{
-	void Show(void){
-		cout<<" TShirt ";
-		person.Show();
-	}
+	public:
+		void Show(void){
+			cout<<" TShirt ";
+			person->Show();
+		}
 };
 
 class BigTrouser : public Finery{
-	void Show(void){
-		cout<<" BigTrouseer ";
-		person.Show();
-	}
+	public:
+		void Show(void){
+			cout<<" BigTrouseer ";
+			person->Show();
+		}
 };
 
 

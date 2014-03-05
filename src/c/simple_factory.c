@@ -13,7 +13,6 @@ DataClass* new_data_class(double value_a, double value_b)
 	{
 		return NULL;
 	}
-	pBaseObj->pDerivedObj = pBaseObj;
 	pBaseObj->ValueA = value_a;
 	pBaseObj->ValueB = value_b;
 	pBaseObj->GetResult = get_result_add;
@@ -21,57 +20,55 @@ DataClass* new_data_class(double value_a, double value_b)
 	return pBaseObj;
 }
 
-void delete_data_class(DataClass* data_obj)
+void delete_data_class(DataClass* pData)
 {
-	free(data_obj);
+	free(pData);
 }
 
-double get_result_add(double value_a, double value_b)
+double get_result_add(DataClass* pData)
 {
-	printf("%lf + %lf = %lf\n",value_a,value_b,(value_a + value_b));
-	return (value_a + value_b);
+	printf("%lf + %lf = %lf\n",pData->ValueA,pData->ValueB, \
+                (pData->ValueA + pData->ValueB));
+	return (pData->ValueA + pData->ValueB);
 }
 
-double get_result_div(double value_a, double value_b)
+double get_result_div(DataClass* pData)
 {
-	if(value_b != 0)
+	if(pData->ValueB != 0)
 	{
-		printf("%lf / %lf = %lf\n",value_a,value_b,(value_a / value_b));
-		return (value_a / value_b);
+		printf("%lf / %lf = %lf\n",pData->ValueA,pData->ValueB, \
+			(pData->ValueA + pData->ValueB));
+		return (pData->ValueA + pData->ValueB);
 	}
-	printf("除数不能为0\n");
+	printf("The divisor must not be 0.\n");
 	return 0;
 }
-double get_result_x_y(double value_a, double value_b)
+double get_result_x_y(DataClass* pData)
 {
 	double result;
 
-	if(value_a != 0)
+	if(pData->ValueA != 0)
 	{
-		result = pow(value_a,value_b);
-		printf("%lf^%lf = %lf\n",value_a,value_b,result);
+		result = pow(pData->ValueA,pData->ValueB);
+		printf("%lf^%lf = %lf\n",pData->ValueA,pData->ValueB,result);
 		return result;
 	}
-	printf("底数不能为0\n");
+	printf("The base number must not be 0.\n");
 	return 0;
 }
 
-DataClass* new_operate_factory_class(double value_a, double value_b, char* oper)
+OperateFactory* new_operate_factory_class(DataClass* pBaseObj, char* oper)
 {
-	DataClass* pBaseObj;
-	OperateFactoryClass* pDerivedObj;
+	OperateFactoryClass* pFactory;
 
-	pBaseObj = new_data_class(value_a,value_b);
-	pDerivedObj = malloc(sizeof(OperateFactoryClass));
-	if(pDerivedObj == NULL)
+	pFactory = malloc(sizeof(OperateFactoryClass));
+	if(pFactory == NULL)
 	{
-		delete_data_class(pBaseObj);
 		return NULL;
 	}
-	pDerivedObj->Operate = (char*)malloc(sizeof(char)*strlen(oper)+1);
-	strcpy(pDerivedObj->Operate,oper);
-	pDerivedObj->pBaseObj = pBaseObj;
-	pBaseObj->pDerivedObj = pDerivedObj;
+	pFactory->pBaseObj = pBaseObj;
+	pFactory->Operate = (char*)malloc(sizeof(char)*strlen(oper)+1);
+	strcpy(pFactory->Operate,oper);
 	
 	if(!strcmp(oper,"+"))
 	{
@@ -86,7 +83,7 @@ DataClass* new_operate_factory_class(double value_a, double value_b, char* oper)
 		pBaseObj->GetResult = get_result_x_y;
 	}
 
-	return pBaseObj;
+	return pFactory;
 }
 
 void delete_operate_factory_class(DataClass* data_obj)
