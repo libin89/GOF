@@ -1,8 +1,7 @@
 #include "proxy_pattern.h"
 
 int main(void){
-	SchoolGirl* girl = new SchoolGirl();
-	girl->name = "jiaojiao";
+	SchoolGirl* girl = new SchoolGirl("jiaojiao");
 
 	Proxy* proxy = new Proxy(girl);
 

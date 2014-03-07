@@ -1,12 +1,21 @@
-#ifdef _PROXY_PATTERN_H
+#ifndef _PROXY_PATTERN_H
 #define _PROXY_PATTERN_H
 
-#include <iosstream>
+#include <iostream>
+#include <cstring>
 using namespace std;
 
 class SchoolGirl{
 	private:
-		char* name;
+		char name[10];
+	public:
+		char* GetName(void){
+			return name;
+		}
+		SchoolGirl(){}
+		SchoolGirl(const char* name){
+			strcpy(this->name,name);
+		}
 };
 
 /* proxy interface */
@@ -22,37 +31,37 @@ class GiveGift{
 
 class Pursuit : public GiveGift{
 	private:
-		SchoolGirl mm;
+		SchoolGirl* mm;
 	public:
-		Pursuit(SchoolGirl mm){
+		Pursuit(SchoolGirl* mm){
 			this->mm = mm;
 		}
 		void GiveDolls(void){
-			cout<<"give dolls to "<<mm.name<<endl;
+			cout<<"give dolls to "<<mm->GetName()<<endl;
 		}
 		void GiveFlowers(void){
-			cout<<"give flowers to "<<mm.name<<endl;
+			cout<<"give flowers to "<<mm->GetName()<<endl;
 		}
 		void GiveChocolate(void){
-			cout<<"give chocolate to "<<mm.name<<endl;
+			cout<<"give chocolate to "<<mm->GetName()<<endl;
 		}
 };
 
 class Proxy : public GiveGift{
 	private:
-		Pursuit gg;
+		Pursuit* gg;
 	public:
-		Proxy(SchoolGirl mm){
+		Proxy(SchoolGirl* mm){
 			gg = new Pursuit(mm);
 		}
 		void GiveDolls(void){
-			gg.GiveDolls();
+			gg->GiveDolls();
 		}
 		void GiveFlowers(void){
-			gg.GiveFlowers();
+			gg->GiveFlowers();
 		}
 		void GiveChocolate(void){
-			gg.GiveChocolate();
+			gg->GiveChocolate();
 		}
 };
 
