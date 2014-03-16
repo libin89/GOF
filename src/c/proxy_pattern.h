@@ -9,9 +9,9 @@ void delete_school_girl(void* girl);
 
 struct _proxy{
 	struct _school_girl* girl;
-	void (*GiveDolls)(void*);
-	void (*GiveFlowers)(void*);
-	void (*GiveChocolate)(void*);
+	void (*GiveDolls)(struct _school_girl*);
+	void (*GiveFlowers)(struct _school_girl*);
+	void (*GiveChocolate)(struct _school_girl*);
 	};
 
 struct _proxy* new_proxy(struct _school_girl* girl);

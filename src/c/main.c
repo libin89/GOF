@@ -1,4 +1,5 @@
 #include "proxy_pattern.h"
+#include <stdio.h>
 
 int main(void)
 {
@@ -6,6 +7,7 @@ int main(void)
 	struct _proxy* proxy;
 
 	mm = new_school_girl("xixi");
+	//printf("mm's name is %s\n",mm->name);
 	proxy = new_proxy(mm);
 	proxy->GiveDolls(mm);
 	proxy->GiveFlowers(mm);

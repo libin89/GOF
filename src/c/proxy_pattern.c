@@ -10,7 +10,7 @@ struct _school_girl* new_school_girl(const char* name){
 	if(girl == NULL){
 		return NULL;
 	}
-	name = (char*)malloc(sizeof(char)*strlen(name));
+	girl->name = (char*)malloc(sizeof(char)*strlen(name));
 	strcpy(girl->name,name);
 
 	return girl;
@@ -27,6 +27,7 @@ struct _proxy* new_proxy(struct _school_girl* girl){
 	if(proxy == NULL){
 		return NULL;
 	}
+	//proxy->girl = (struct _school_girl*)malloc(sizeof(struct _school_girl));
 	proxy->girl = girl;
 	proxy->GiveDolls = give_dolls;
 	proxy->GiveFlowers = give_flowers;
