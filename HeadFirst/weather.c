@@ -5,50 +5,49 @@
 * for example, add(void *object), remove(int objectNum), int indexOf(void *object),
 * void *get(int objectNum), int size(void), void *initialize(void), delete(void *)
 *************************************************************************************/
-void (*setChanged)(struct WeatherData *wd)
+void setChanged(struct WeatherData *wd)
 {
     wd->changed = true;
 }
-void (*clearChanged)(struct WeatherData *wd)
+void clearChanged(struct WeatherData *wd)
 {
     wd->changed = false;
 }
-bool (*hasChanged)(struct WeatherData *wd)
+bool hasChanged(struct WeatherData *wd)
 {
     return wd->changed;
 }
-float (*getTemperature)(struct WeatherData *wd)
+float getTemperature(struct WeatherData *wd)
 {
     return wd->temperature;
 }
-float (*getHumidity)(struct WeatherData *wd)
+float getHumidity(struct WeatherData *wd)
 {
     return wd->humidity;
 }
-float (*getPressure)(struct WeatherData *wd)
+float getPressure(struct WeatherData *wd)
 {
     return wd->pressure;
 }
-void (*registerConditionDisplay)(struct WeatherData *wd, void *currentConditionDisplay)
+void registerConditionDisplay(struct WeatherData *wd, void *currentConditionDisplay)
 {
     CurrentConditionDisplay *ccd = (ConditionDisplay *)currentConditionDisplay;
-    wd->conditionDisplayList.add(ccd);
+    listNode *node = wd->conditionDisplayList->newListNode((void *)ccd);
+    wd->conditionDisplayList->push(wd->conditionDisplayList, node);
 }
-void (*removeConditionDisplay)(struct WeatherData *wd, void *currentConditionDisplay)
+void removeConditionDisplay(struct WeatherData *wd, void *currentConditionDisplay)
 {
-    int i = wd->conditionDisplayList.indexOf((ConditionDisplay *)currentConditionDisplay);
-    if (i >= 0) {
-        wd->conditionDisplayList.remove(i);
-    }
+    wd->conditionDisplayList->removeV2(wd->conditionDisplayList, offsetof(CurrentConditionDisplay, key),\
+        currentConditionDisplay->key, sizeof(int));
 }
-void (*notifyConditionDisplays)(struct WeatherData *wd)
+void notifyConditionDisplays(struct WeatherData *wd)
 {
     int i = 0;
     CurrentConditionDisplay *ccd = NULL;
 
     if (wd->hasChanged(wd)) {
-        for (i = 0; i < wd->conditionDisplayList.size(); i++) {
-            ccd = (CurrentConditionDisplay *)wd->conditionDisplayList.get(i);
+        for (i = 0; i < wd->conditionDisplayList.size; i++) {
+            ccd = (CurrentConditionDisplay *)(wd->conditionDisplayList->get(wd->conditionDisplayList, i)->data);
             #if 0 //choice one of update functions accroding to need
             cd->update(cd, wd->temperature, wd->humidity, wd->pressure);
             #else
@@ -59,12 +58,12 @@ void (*notifyConditionDisplays)(struct WeatherData *wd)
     }
     
 }
-void (*measurementChanged)(struct WeatherData *wd)
+void measurementChanged(struct WeatherData *wd)
 {
     wd->setChanged(wd);
     wd->notifyConditionDisplays(wd);
 }
-void (*setMeasurements)(struct WeatherData *wd, float temp, float humidity, float pressure)
+void setMeasurements(struct WeatherData *wd, float temp, float humidity, float pressure)
 {
     wd->temperature = temp;
     wd->humidity = humidity;
@@ -88,7 +87,7 @@ struct WeatherData *newWeatherData(void)
         free(wd);
         return NULL;
     }
-    wd->conditionDisplayList = InitializeList(ccd); //initialize a list
+    wd->conditionDisplayList = newList(NULL); //initialize a list
     wd->registerConditionDisplay = registerConditionDisplay;
     wd->removeConditionDisplay = removeConditionDisplay;
     wd->notifyConditionDisplays = notifyConditionDisplays;
@@ -103,20 +102,20 @@ void deleteWeatherData(struct WeatherData *wd)
         free(wd);
 }
 
-void (*update)(struct CurrentConditionDisplay *ccd, float temp, float humidity, float pressure)
+void update(struct CurrentConditionDisplay *ccd, float temp, float humidity, float pressure)
 {
     ccd->temperature = temp;
     ccd->humidity = humidity;
     ccd->pressure = pressure;
     ccd->display(ccd);
 }
-void (*updateV2)(struct CurrentConditionDisplay *ccd)
+void updateV2(struct CurrentConditionDisplay *ccd)
 {
     ccd->temperature = ((WeatherData *)ccd->weatherData)->getTemperature;
     ccd->humidity = ((WeatherData *)ccd->weatherData)->getHumidity;
     ccd->display(ccd);
 }
-void (*display)(struct CurrentConditionDisplay *ccd)
+void display(struct CurrentConditionDisplay *ccd)
 {
     printf("Current Conditions: %d degrees and %d humidity", ccd->temperature, ccd->humidity);
 }
@@ -132,6 +131,7 @@ struct CurrentConditionDisplay *newCurrentConditionDisplay(struct WeatherData *w
     ccd->weatherData = (void *)wd;
     ccd->update = update;
     ccd->display = display;
+    ccd->key = 0;
     wd->registerConditionDisplay(wd, ccd);
 
     return ccd;

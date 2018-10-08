@@ -7,6 +7,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <types.h>
+#include <stddef.h>
+
+#ifndef offsetof
+#define offsetof(TYPE, MEMBER) (size_t)&(((TYPE *)0)->MEMBER)
+#endif
 
 //WeatherData as a Subject class
 typedef struct WeatherData {
@@ -34,6 +39,7 @@ void deleteWeatherData(struct WeatherData *wd);
 
 //CurrentConditionDisplay as a Observer class
 typedef struct CurrentConditionDisplay {
+    int key; //distingguish different condition display instance
     float temperature;
     float humidity;
     void *weatherData;
