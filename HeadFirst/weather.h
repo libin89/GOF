@@ -6,8 +6,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <types.h>
 #include <stddef.h>
+#include <sys/types.h>
+#include <stdbool.h>
 
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) (size_t)&(((TYPE *)0)->MEMBER)
@@ -42,6 +43,7 @@ typedef struct CurrentConditionDisplay {
     int key; //distingguish different condition display instance
     float temperature;
     float humidity;
+    float pressure;
     void *weatherData;
     void (*update)(struct CurrentConditionDisplay *ccd, float temp, float humidity, float pressure);
     void (*display)(struct CurrentConditionDisplay *ccd);
@@ -49,7 +51,7 @@ typedef struct CurrentConditionDisplay {
     //add new update function to pull data from subject willingly
     void (*updateV2)(struct CurrentConditionDisplay *ccd);
 }CurrentConditionDisplay;
-struct CurrentConditionDisplay *newCurrentConditionDisplay(struct WeatherData *wd);
+struct CurrentConditionDisplay *newCurrentConditionDisplay(struct WeatherData *wd, int currentConditionDisplayKey);
 void deleteCurrentConditionDisplay(struct CurrentConditionDisplay *ccd);
 
 #endif

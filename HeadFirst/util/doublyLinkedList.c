@@ -94,7 +94,7 @@ listNode *leftPop(struct doublyLinkedList *list)
 
     return node;
 }
-void remove(struct doublyLinkedList *list, listNode *node)
+void removeNode(struct doublyLinkedList *list, listNode *node)
 {
     if (!node) {
         printf("node is null.\n");
@@ -115,15 +115,15 @@ void remove(struct doublyLinkedList *list, listNode *node)
     free(node);
     --list->size;
 }
-void removeV2(struct doublyLinkedList *list, int offset,\
+void removeNodeV2(struct doublyLinkedList *list, int offset,\
             void *data, int bytes)
 {
     listNode *node = list->head;
 
     while (node) {
-        if (isFullZero(((char *)node->data + offset), bytes) == 0\
-            && memcmp(data, ((char *)node->data + offset), bytes) == 0)
-            list->remove(list, node);
+        if (data != NULL && memcmp(data, ((char *)node->data + offset), bytes) == 0) {
+            list->removeNode(list, node);
+        }
         node = node->next;
     }
 }
@@ -152,6 +152,7 @@ listNode *get(struct doublyLinkedList *list, int index)
     if (index < 0) {
         direction = LIST_TAIL;
         index = -index;
+        node = list->tail;
     }
 
     if (index < list->size) {
@@ -194,8 +195,8 @@ doublyLinkedList *newList(void (*func)(void *data))
     list->func = func;
     list->push = rightPush;
     list->pop = rightPop;
-    list->remove = remove;
-    list->removeV2 = removeV2;
+    list->removeNode = removeNode;
+    list->removeNodeV2 = removeNodeV2;
     list->find = find;
     list->get = get;
 
@@ -215,3 +216,41 @@ void deleteList(doublyLinkedList *list)
     }
     free(list);
 }
+
+#ifdef DOUBLYLINKEDLIST
+typedef struct s {
+        int i;
+        char j;
+} s;
+int main(void)
+{
+    s test[3];
+    test[0].i = -10;
+    test[0].j = 12;
+    test[1].i = 34;
+    test[1].j = 70;
+    doublyLinkedList *list = newList(NULL);
+    
+    list->push(list, newListNode(&test[0]));
+    list->push(list, newListNode(&test[1]));
+
+    listNode *node = NULL;
+    for(int i = 0; i < list->size; i++) {
+        node = list->get(list, i);
+        printf("get node %d\n", ((struct s *)node->data)->i);
+    }
+
+    char key = 70;
+    //printf("offset j %d\n", offsetof(s, j));
+    //node = list->find(list, offsetof(s, j), &key, sizeof(char), 0, NULL, 0);
+    //printf("find node %d\n", ((struct s *)node->data)->i);
+    //list->removeNode(list, node);
+    list->removeNodeV2(list, offsetof(s, j), &key, sizeof(char));
+    for(int i = 0; i < list->size; i++) {
+        node = list->get(list, i);
+        printf("get node %d\n", ((struct s *)node->data)->i);
+    }
+
+    return 0;
+}
+#endif

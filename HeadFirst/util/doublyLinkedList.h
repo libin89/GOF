@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
+
+#ifndef offsetof
+#define offsetof(TYPE, MEMBER) (size_t)&(((TYPE *)0)->MEMBER)
+#endif
 
 typedef enum {
     LIST_HEAD,
@@ -22,9 +27,9 @@ typedef struct doublyLinkedList {
     int size;
     void (*func)(void *data); //reserved
     listNode *(*push)(struct doublyLinkedList *list, listNode *node);
-    listNode *(*pop)(struct doublyLinkedList *list, listNode *node);
-    void (*remove)(struct doublyLinkedList *list, listNode *node);
-    void (*removeV2)(struct doublyLinkedList *list, int offset,\
+    listNode *(*pop)(struct doublyLinkedList *list);
+    void (*removeNode)(struct doublyLinkedList *list, listNode *node);
+    void (*removeNodeV2)(struct doublyLinkedList *list, int offset,\
             void *data, int bytes);
     listNode *(*find)(struct doublyLinkedList *list, int offsetMatch, void *match,\
             int lenMatch, int offsetExclude, void *exclude, int lenExclude);

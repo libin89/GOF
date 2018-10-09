@@ -91,6 +91,7 @@ void delete(Duck *duck)
         free(duck);
 }
 
+#ifdef DUCK
 int main(void)
 {
     int whatKindOfDuck = 0;
@@ -109,3 +110,4 @@ int main(void)
 
     return 0;
 }
+#endif

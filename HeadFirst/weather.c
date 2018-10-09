@@ -1,9 +1,8 @@
 #include "weather.h"
+#include "util/doublyLinkedList.h"
 
 /************************************************************************************
-* suppose to have a index list class,  and have some functions to operate it.
-* for example, add(void *object), remove(int objectNum), int indexOf(void *object),
-* void *get(int objectNum), int size(void), void *initialize(void), delete(void *)
+
 *************************************************************************************/
 void setChanged(struct WeatherData *wd)
 {
@@ -31,23 +30,30 @@ float getPressure(struct WeatherData *wd)
 }
 void registerConditionDisplay(struct WeatherData *wd, void *currentConditionDisplay)
 {
-    CurrentConditionDisplay *ccd = (ConditionDisplay *)currentConditionDisplay;
-    listNode *node = wd->conditionDisplayList->newListNode((void *)ccd);
-    wd->conditionDisplayList->push(wd->conditionDisplayList, node);
+    CurrentConditionDisplay *ccd = (CurrentConditionDisplay *)currentConditionDisplay;
+    doublyLinkedList *list = (doublyLinkedList *)wd->conditionDisplayList;
+
+    listNode *node = newListNode((void *)ccd);
+    list->push(list, node);
 }
 void removeConditionDisplay(struct WeatherData *wd, void *currentConditionDisplay)
 {
-    wd->conditionDisplayList->removeV2(wd->conditionDisplayList, offsetof(CurrentConditionDisplay, key),\
-        currentConditionDisplay->key, sizeof(int));
+    CurrentConditionDisplay *ccd = (CurrentConditionDisplay *)currentConditionDisplay;
+    doublyLinkedList *list = (doublyLinkedList *)wd->conditionDisplayList;
+    listNode * node = list->find(list, offsetof(CurrentConditionDisplay, key),\
+        (void *)&(ccd->key), sizeof(int), 0, NULL, 0);
+    if (node)
+        list->removeNode(list, node);
 }
 void notifyConditionDisplays(struct WeatherData *wd)
 {
     int i = 0;
     CurrentConditionDisplay *ccd = NULL;
+    doublyLinkedList *list = (doublyLinkedList *)wd->conditionDisplayList;
 
     if (wd->hasChanged(wd)) {
-        for (i = 0; i < wd->conditionDisplayList.size; i++) {
-            ccd = (CurrentConditionDisplay *)(wd->conditionDisplayList->get(wd->conditionDisplayList, i)->data);
+        for (i = 0; i < list->size; i++) {
+            ccd = (CurrentConditionDisplay *)(list->get(list, i)->data);
             #if 0 //choice one of update functions accroding to need
             cd->update(cd, wd->temperature, wd->humidity, wd->pressure);
             #else
@@ -73,33 +79,38 @@ void setMeasurements(struct WeatherData *wd, float temp, float humidity, float p
 struct WeatherData *newWeatherData(void)
 {
     WeatherData *wd = NULL;
-    CurrentConditionDisplay *ccd = NULL;
 
     wd = (WeatherData *)malloc(sizeof(struct WeatherData));
     if (!wd) {
         printf("malloc error!\n");
         return NULL;
     }
-
-    ccd = (CurrentConditionDisplay *)malloc(sizeof(CurrentConditionDisplay));
-    if (!ccd) {
-        printf("malloc error!\n");
+    wd->conditionDisplayList = newList(NULL); //initialize a list
+    if (!wd->conditionDisplayList) {
+        printf("generate new list error.\n");
         free(wd);
         return NULL;
     }
-    wd->conditionDisplayList = newList(NULL); //initialize a list
     wd->registerConditionDisplay = registerConditionDisplay;
     wd->removeConditionDisplay = removeConditionDisplay;
     wd->notifyConditionDisplays = notifyConditionDisplays;
     wd->measurementChanged = measurementChanged;
     wd->setMeasurements = setMeasurements;
+    wd->setChanged = setChanged;
+    wd->clearChanged = clearChanged;
+    wd->hasChanged = hasChanged;
+    wd->getTemperature = getTemperature;
+    wd->getHumidity = getHumidity;
+    wd->getPressure = getPressure;
 
     return wd;
 }
 void deleteWeatherData(struct WeatherData *wd)
 {
-    if (wd)
+    if (wd) {
+        deleteList((doublyLinkedList *)wd->conditionDisplayList);
         free(wd);
+    }
 }
 
 void update(struct CurrentConditionDisplay *ccd, float temp, float humidity, float pressure)
@@ -111,15 +122,21 @@ void update(struct CurrentConditionDisplay *ccd, float temp, float humidity, flo
 }
 void updateV2(struct CurrentConditionDisplay *ccd)
 {
-    ccd->temperature = ((WeatherData *)ccd->weatherData)->getTemperature;
-    ccd->humidity = ((WeatherData *)ccd->weatherData)->getHumidity;
+    WeatherData *wd = (WeatherData *)ccd->weatherData;
+
+    ccd->temperature = wd->getTemperature(wd);
+    ccd->humidity = wd->getHumidity(wd);
     ccd->display(ccd);
 }
-void display(struct CurrentConditionDisplay *ccd)
+void displayForecast(struct CurrentConditionDisplay *ccd)
 {
-    printf("Current Conditions: %d degrees and %d humidity", ccd->temperature, ccd->humidity);
+    printf("%s, Current Conditions: %f degrees and %f humidity\n", __func__, ccd->temperature, ccd->humidity);
 }
-struct CurrentConditionDisplay *newCurrentConditionDisplay(struct WeatherData *wd)
+void displayCurrentSituation(struct CurrentConditionDisplay *ccd)
+{
+    printf("%s, Current Conditions: %f degrees and %f humidity\n", __func__, ccd->temperature, ccd->humidity);
+}
+struct CurrentConditionDisplay *newCurrentConditionDisplay(struct WeatherData *wd, int currentConditionDisplayKey)
 {
     CurrentConditionDisplay *ccd = NULL;
 
@@ -129,17 +146,55 @@ struct CurrentConditionDisplay *newCurrentConditionDisplay(struct WeatherData *w
         return NULL;
     }
     ccd->weatherData = (void *)wd;
+    ccd->key = currentConditionDisplayKey;
     ccd->update = update;
-    ccd->display = display;
-    ccd->key = 0;
-    wd->registerConditionDisplay(wd, ccd);
+    ccd->updateV2 = updateV2;
+    switch (currentConditionDisplayKey) {
+        case 0:
+            ccd->display = displayForecast;
+            break;
+        case 1:
+            ccd->display = displayCurrentSituation;
+            break;
+        default:
+            break;
+    }
 
     return ccd;
 }
 void deleteCurrentConditionDisplay(struct CurrentConditionDisplay *ccd)
 {
-    if (ccd && ccd->weatherData) {
-        wd->removeConditionDisplay((WeatherData *)ccd->weatherData, ccd);
+    WeatherData *wd = (WeatherData *)ccd->weatherData;
+    if (ccd && wd) {
+        wd->removeConditionDisplay(wd, ccd);
         free(ccd);
     }
 }
+
+#ifdef WEATHER
+int main(void)
+{
+    printf("Enter main...\n");
+    WeatherData *wd = newWeatherData();
+    CurrentConditionDisplay *displayForecast = newCurrentConditionDisplay(wd, 0);
+    CurrentConditionDisplay *displayCurrentSituation = newCurrentConditionDisplay(wd, 1);
+
+    //add displays to weather data
+    ((WeatherData *)(displayForecast->weatherData))->registerConditionDisplay(wd, displayForecast);
+    ((WeatherData *)(displayCurrentSituation->weatherData))->registerConditionDisplay(wd, displayCurrentSituation);
+
+    //weather data changed
+    wd->setMeasurements(wd, 35, 80.5f, 48.0f);
+    wd->setMeasurements(wd, 55, 60.5f, 80);
+
+    //display forecast cancle to observer weather data
+    ((WeatherData *)(displayForecast->weatherData))->removeConditionDisplay(wd, displayForecast);
+    wd->setMeasurements(wd, 25, 67, 90);
+
+    deleteCurrentConditionDisplay(displayCurrentSituation);
+    deleteCurrentConditionDisplay(displayForecast);
+    deleteWeatherData(wd);
+    printf("Exit main.\n");
+    return 0;
+}
+#endif
