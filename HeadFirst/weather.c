@@ -1,5 +1,5 @@
 #include "weather.h"
-#include "util/doublyLinkedList.h"
+#include "doublyLinkedList.h"
 
 /************************************************************************************
 

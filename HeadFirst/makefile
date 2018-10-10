@@ -46,7 +46,7 @@ CC = gcc
 CXX = g++
 MY_LIBS =
 # The pre-processor and compiler options.
-MY_CFLAGS = -pthread -D$(DEFS)
+MY_CFLAGS = -pthread -Iutil -D$(DEFS)
 # The pre-processor options used by the cpp (man cpp for more).
 CPPFLAGS  = -Wall -Wno-strict-aliasing
 # The pre-processor and compiler options.
@@ -120,6 +120,7 @@ $(OBJDIR)/%.d:%.cxx
 	@echo -n $(dir $<) > $@
 	@$(DEPEND.d) $< >> $@
 
+sinclude $(SRCS:.c=.d)
 
 $(OBJDIR)/%.o:%.c #自动去VPATH指定的目录查找，指定多个路径 写成VPATH = src:src1:src2
 	@if [ ! -d $(OBJDIR)/$(dir $<) ]; then mkdir -p  $(OBJDIR)/$(dir $<); fi;
@@ -188,4 +189,4 @@ show:
 	@echo 'link.cxx    :' $(LINK.cxx)
 
 clean:
-	$(RM) $(OBJS) $(PROGRAM) *.exe
+	$(RM) $(OBJS) $(PROGRAM) $(SRCS:.c=.d) *.exe
