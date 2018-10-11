@@ -84,7 +84,7 @@ $(OBJDIR)/%.d:%.c
 	sed 's,^.*\.o[ :]*,$@ $(patsubst %.d, %.o, $@) : ,g' < $@.$$$$ > $@; \
 	#sed 's,\($(notdir $*)\)\.o[ :]*,$(OBJDIR)/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -rf $@.$$$$
-	
+
 $(OBJDIR)/%.d:%.C
 	@if [ ! -d $(OBJDIR)/$(dir $<) ]; then mkdir -p  $(OBJDIR)/$(dir $<); fi;
 	@echo -n $(dir $<) > $@
@@ -120,7 +120,7 @@ $(OBJDIR)/%.d:%.cxx
 	@echo -n $(dir $<) > $@
 	@$(DEPEND.d) $< >> $@
 
-sinclude $(SRCS:.c=.d)
+sinclude $(OBJS:.o=.d)
 
 $(OBJDIR)/%.o:%.c #自动去VPATH指定的目录查找，指定多个路径 写成VPATH = src:src1:src2
 	@if [ ! -d $(OBJDIR)/$(dir $<) ]; then mkdir -p  $(OBJDIR)/$(dir $<); fi;
@@ -189,4 +189,4 @@ show:
 	@echo 'link.cxx    :' $(LINK.cxx)
 
 clean:
-	$(RM) $(OBJS) $(PROGRAM) $(SRCS:.c=.d) *.exe
+	$(RM) $(OBJS) $(PROGRAM) $(OBJS:.o=.d) *.exe
