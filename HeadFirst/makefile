@@ -2,7 +2,7 @@
 PROGRAM = test
 
 # this macro which files will be compiled
-DEFS = WEATHER
+DEFS = BEVERAGE
 
 ## Stable Section: usually no need to be changed. But you can add more.
 ##==========================================================================
