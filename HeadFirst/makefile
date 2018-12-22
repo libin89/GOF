@@ -1,8 +1,8 @@
 # target file name, if not define PROGRAM, will use default value.
 PROGRAM = test
 
-# this macro which files will be compiled
-DEFS = BEVERAGE
+# this macro decide which files will be compiled
+DEFS = COMMAND
 
 ## Stable Section: usually no need to be changed. But you can add more.
 ##==========================================================================

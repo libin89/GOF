@@ -1,0 +1,16 @@
+# Command line options
+AddOption('--obj',
+	dest='obj',
+	type='string',
+	nargs=1,
+	action='store',
+	help='set object file: duck or others')
+
+objs = []
+objs.append(GetOption('obj'))
+obj_upper = objs[0].lower() + '.c'
+env = Environment()
+env.Append(CPPDEFINES = objs[0].upper())
+
+
+env.Program(Glob("*.c"))
